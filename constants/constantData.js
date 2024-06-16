@@ -1,0 +1,1 @@
+export  const ROOT_DEV = document.getElementById("root");
