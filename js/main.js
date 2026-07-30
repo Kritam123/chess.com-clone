@@ -1,104 +1,58 @@
-// getting root container
 import { ROOT_DEV } from "../constants/constantData.js";
-import { BlackBishop, BlackKing, BlackKnight, BlackPawn, BlackQueen, BlackRook, WhiteBishop, WhiteKing, WhiteKnight, WhitePawn, WhiteQueen, WhiteRook } from "./pieceRender.js";
-// initalizing game or app
-function initalPieces ( square )
-{
-    if ( Number( square.id[ 1 ] ) === 7 )
-    {
-        square.piece = BlackPawn( square.id, "/images/pieces/black/pawn.png","BlackPawn" )
+
+const WHITE_FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
+function orderedPositions(orientation) {
+    const ranks = orientation === "black"
+        ? [1, 2, 3, 4, 5, 6, 7, 8]
+        : [8, 7, 6, 5, 4, 3, 2, 1];
+    const files = orientation === "black"
+        ? [...WHITE_FILES].reverse()
+        : WHITE_FILES;
+    return ranks.flatMap((rank) => files.map((file) => `${file}${rank}`));
+}
+
+function piecesRender(board) {
+    for (const square of Object.values(board)) {
+        const squareElement = document.getElementById(square.id);
+        if (!squareElement) continue;
+        squareElement.querySelector("img")?.remove();
+        if (!square.piece) continue;
+
+        const piece = document.createElement("img");
+        piece.src = square.piece.img;
+        piece.alt = `${square.piece.type} ${square.piece.pieceId
+            .replace(/white|black/gi, "")}`;
+        piece.draggable = false;
+        squareElement.appendChild(piece);
     }
-    else if ( Number( square.id[ 1 ] ) === 2 )
-    {
+}
 
-        square.piece = WhitePawn( square.id, "/images/pieces/white/pawn.png" ,"WhitePawn" )
+function initGame(board, orientation = "white") {
+    ROOT_DEV.replaceChildren();
+    ROOT_DEV.dataset.orientation = orientation;
 
+    for (const position of orderedPositions(orientation)) {
+        const square = board[position];
+        const squareBox = document.createElement("button");
+        const file = WHITE_FILES.indexOf(position[0]);
+        const rank = Number(position[1]);
+        const isLight = (file + rank) % 2 === 1;
 
-    } else if ( square.id === "a8" || square.id === "h8" )
-    {
+        squareBox.type = "button";
+        squareBox.className = `square ${isLight ? "light" : "dark"}`;
+        squareBox.id = position;
+        squareBox.dataset.square = position;
+        squareBox.setAttribute("aria-label", position);
 
-        square.piece = BlackRook( square.id, "/images/pieces/black/rook.png","BlackRook" );
-
-
-    } else if ( square.id === "a1" || square.id === "h1" )
-    {
-
-        square.piece = WhiteRook( square.id, "/images/pieces/white/rook.png","WhiteRook" );
-    } else if ( square.id === "b8" || square.id === "g8" )
-    {
-        square.piece = BlackKnight( square.id, "/images/pieces/black/knight.png","BlackKnight" );
-    } else if ( square.id === "b1" || square.id === "g1" )
-    {
-
-        square.piece = WhiteKnight( square.id, "/images/pieces/white/knight.png","WhiteKnight" );
-    } else if ( square.id === "c8" || square.id === "f8" )
-    {
-        square.piece = BlackBishop( square.id, "/images/pieces/black/bishop.png","BlackBishop" );
-
-
-    } else if ( square.id === "c1" || square.id === "f1" )
-    {
-        square.piece = WhiteBishop( square.id, "/images/pieces/white/bishop.png","WhiteBishop" );
-
-    } else if ( square.id === "d8" )
-    {
-        square.piece = BlackQueen( square.id, "/images/pieces/black/queen.png","BlackQueen" );
-
-    } else if ( square.id === "d1" )
-    {
-        square.piece = WhiteQueen( square.id, "/images/pieces/white/queen.png" ,"WhiteQueen" );
-
-    } else if ( square.id === "e8" )
-    {
-        square.piece = BlackKing( square.id, "/images/pieces/black/king.png","BlackKing" );
-        // square.piece = "/images/pieces/black/king.png";
-
-    } else if ( square.id === "e1" )
-    {
-        square.piece = WhiteKing( square.id, "/images/pieces/white/king.png","WhiteKing" );
-
+        const coordinate = document.createElement("span");
+        coordinate.className = "coordinate";
+        coordinate.textContent = position;
+        squareBox.appendChild(coordinate);
+        ROOT_DEV.appendChild(squareBox);
     }
 
-}
-// piecesRenderIn Board 
-function piecesRender( initData )
-{
-    initData.forEach( ( row ) =>
-    {
-        row.forEach( ( square ) =>
-            {
-            if(square.piece)
-            {
-                const squareEl = document.getElementById( square?.id);
-                const piece = document.createElement('img');
-                piece.src= square.piece.img;
-            //     // insert piece into square element
-                squareEl.appendChild( piece );
-            }
-        } )
-    } )
-}
-function initGame ( initData )
-{ //   initial renders
-    initData?.forEach( ( element ) => 
-    {
-        const squareRow = document.createElement( "div" );
-        squareRow.classList.add( "squareRow" );
-        element.forEach( ( square ) =>
-        {
-
-            const squareBox = document.createElement( "span" );
-            squareBox.classList.add( square.color, "square" );
-            squareBox.id = square.id;
-            //   initial postion of pieces
-            initalPieces( square );
-            squareRow.appendChild( squareBox );
-        } );
-        ROOT_DEV.appendChild( squareRow );
-    } );
-    piecesRender( initData );
+    piecesRender(board);
 }
 
-
-
-export { initGame,piecesRender }
+export { initGame, piecesRender };

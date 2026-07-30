@@ -3,46 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess.com</title>
+    <meta name="theme-color" content="#11100e">
+    <title>Checkmate Rooms — Live Chess</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div id="game-status" role="status" aria-live="polite">White to move</div>
-    <div id="root"></div>
-    <div class="fixed">
-        <div class="box">
-            <h1 style="text-align: center;color: rgba(255, 0, 0, 0.555);">Pawn Promotion</h1>
-            <!-- list of can promote pieces -->
-             <ul class="whitePieces">
-                <li id="WhiteRook">
-                    <img src="/images/pieces/white/rook.png" alt="WhiteRook">
-                </li>
-                <li id="WhiteKnight">
-                    <img src="/images/pieces/white/knight.png" alt="WhiteKnight">
-                </li>
-                <li id="WhiteBishop">
-                    <img src="/images/pieces/white/bishop.png" alt="WhiteBishop">
-                </li>
-                <li id="WhiteQueen">
-                    <img src="/images/pieces/white/queen.png" alt="WhiteQueen">
-                </li>
-             </ul>
-             <ul class="blackPieces">
-                <li id="BlackRook">
-                    <img src="/images/pieces/black/rook.png" alt="BlackRook">
-                </li>
-                <li id="BlackKnight">
-                    <img src="/images/pieces/black/knight.png" alt="BlackKnight">
-                </li>
-                <li id="BlackBishop">
-                    <img src="/images/pieces/black/bishop.png" alt="BlackBishop">
-                </li>
-                <li id="BlackQueen">
-                    <img src="/images/pieces/black/queen.png" alt="BlackQueen">
-                </li>
-             </ul>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="topbar">
+        <a class="brand" href="/" aria-label="Checkmate Rooms home">
+            <span class="brand-mark">♞</span>
+            <span><b>CHECKMATE</b><small>ROOMS</small></span>
+        </a>
+        <div class="connection">
+            <span class="connection-dot" data-state="connecting"></span>
+            <span id="connection-label">Connecting</span>
         </div>
-    </div>
+        <div class="room-chip">
+            <span>ROOM</span>
+            <strong id="room-code">— — — — — —</strong>
+            <button id="copy-room" class="icon-button" type="button" title="Copy invite link">
+                COPY
+            </button>
+        </div>
+    </header>
+
+    <main id="game-shell" class="game-shell waiting-for-room" aria-hidden="true">
+        <section class="board-column" aria-label="Chess board">
+            <div id="opponent-slot" class="player-slot">
+                <article id="black-player" class="player-card">
+                    <span class="piece-token dark-token">♚</span>
+                    <div><strong class="player-name">Open seat</strong>
+                        <span class="player-color">Waiting to join</span></div>
+                    <span class="you-label">YOU</span>
+                    <i class="presence" data-online="false"></i>
+                </article>
+            </div>
+
+            <div class="board-wrap">
+                <div id="root" class="chess-board"></div>
+                <div id="waiting-card" class="board-overlay waiting-card hidden">
+                    <span class="orbit-loader"><i></i></span>
+                    <p>Waiting for a worthy opponent</p>
+                    <strong>— — — — — —</strong>
+                    <small>Share this room code with player two</small>
+                </div>
+                <div id="game-over-card" class="board-overlay result-card hidden">
+                    <span class="result-piece">♚</span>
+                    <p id="result-title">Game over</p>
+                    <small id="result-copy">The game has ended.</small>
+                </div>
+            </div>
+
+            <div id="self-slot" class="player-slot">
+                <article id="white-player" class="player-card">
+                    <span class="piece-token">♔</span>
+                    <div><strong class="player-name">Open seat</strong>
+                        <span class="player-color">Waiting to join</span></div>
+                    <span class="you-label">YOU</span>
+                    <i class="presence" data-online="false"></i>
+                </article>
+            </div>
+        </section>
+
+        <aside class="game-panel">
+            <div class="match-meta">
+                <span>LIVE MATCH</span>
+                <small>CASUAL · UNTIMED</small>
+            </div>
+            <div id="game-status" class="game-status" role="status" aria-live="polite">
+                Waiting for room
+            </div>
+
+            <section class="moves-panel">
+                <div class="panel-heading"><h2>Score sheet</h2><span>ALGEBRAIC</span></div>
+                <ol id="move-list" class="move-list">
+                    <li class="empty-state">Moves will appear here once the game begins.</li>
+                </ol>
+            </section>
+
+            <section class="chat-panel">
+                <div class="panel-heading"><h2>Table talk</h2><span>LIVE</span></div>
+                <ul id="chat-list" class="chat-list">
+                    <li class="chat-empty">No messages yet. Say hello.</li>
+                </ul>
+                <form id="chat-form" class="chat-form">
+                    <label class="sr-only" for="chat-input">Message</label>
+                    <input id="chat-input" maxlength="240" placeholder="Write a message…" autocomplete="off">
+                    <button type="submit" aria-label="Send message">↗</button>
+                </form>
+            </section>
+
+            <div class="game-actions">
+                <button id="resign-button" class="secondary-button" type="button">Resign</button>
+                <button id="rematch-button" class="primary-button" type="button" hidden>Request rematch</button>
+                <button id="leave-button" class="text-button" type="button">Leave room</button>
+            </div>
+        </aside>
+    </main>
+
+    <section id="lobby" class="lobby" aria-label="Create or join a chess room">
+        <div class="lobby-art" aria-hidden="true">
+            <span class="giant-piece">♞</span>
+            <div class="rank-lines"><i></i><i></i><i></i><i></i></div>
+            <p>YOUR MOVE<br>TRAVELS<br>INSTANTLY.</p>
+        </div>
+        <div class="lobby-card">
+            <span class="eyebrow">PRIVATE REALTIME CHESS</span>
+            <h1>Meet at the<br><em>same board.</em></h1>
+            <p class="lobby-copy">Create a private table, send one code, and play live from two browsers. No account required.</p>
+
+            <div class="lobby-tabs" role="tablist">
+                <button class="active" data-lobby-tab="create" type="button">Create room</button>
+                <button data-lobby-tab="join" type="button">Join room</button>
+            </div>
+
+            <form id="create-room-form" class="lobby-form">
+                <label>Your display name
+                    <input name="name" maxlength="24" required placeholder="e.g. Mikhail">
+                </label>
+                <fieldset>
+                    <legend>Choose your pieces</legend>
+                    <label class="color-choice"><input type="radio" name="color" value="white" checked>
+                        <span>♔ <b>White</b><small>First move</small></span></label>
+                    <label class="color-choice"><input type="radio" name="color" value="black">
+                        <span>♚ <b>Black</b><small>Second move</small></span></label>
+                    <label class="color-choice"><input type="radio" name="color" value="random">
+                        <span>↻ <b>Random</b><small>Surprise me</small></span></label>
+                </fieldset>
+                <button class="primary-button large" type="submit">Create private room <span>→</span></button>
+            </form>
+
+            <form id="join-room-form" class="lobby-form" hidden>
+                <label>Your display name
+                    <input name="name" maxlength="24" required placeholder="e.g. Garry">
+                </label>
+                <label>Six-character room code
+                    <input id="join-code" class="code-input" name="roomId" maxlength="6"
+                        pattern="[A-Za-z0-9]{6}" required placeholder="K7M2PQ"
+                        autocapitalize="characters" autocomplete="off">
+                </label>
+                <button class="primary-button large" type="submit">Take the open seat <span>→</span></button>
+            </form>
+
+            <div class="trust-row"><span>● SERVER VALIDATED</span><span>● AUTO RECONNECT</span></div>
+        </div>
+    </section>
+
+    <dialog id="promotion-dialog" class="promotion-dialog">
+        <form method="dialog">
+            <span class="eyebrow">PAWN PROMOTION</span>
+            <h2>Choose its new rank.</h2>
+            <div class="promotion-options">
+                <button type="button" data-promotion="queen"><img alt="Queen"><span>Queen</span></button>
+                <button type="button" data-promotion="rook"><img alt="Rook"><span>Rook</span></button>
+                <button type="button" data-promotion="bishop"><img alt="Bishop"><span>Bishop</span></button>
+                <button type="button" data-promotion="knight"><img alt="Knight"><span>Knight</span></button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="alert"></div>
     <script type="module" src="/js/index.js"></script>
 </body>
 </html>

@@ -1,15 +1,16 @@
 import { GlobalEvents } from "../Events/globalEvents.js";
-import { initData } from "./data.js";
+import { createInitialBoard } from "../Helper/boardFactory.js";
 import { initGame } from "./main.js";
 
+let keySquareMapper = createInitialBoard();
+let globalState = Object.values(keySquareMapper);
 
-const globalState = initData();
-let keySquareMapper = {};
+function setBoard(board) {
+    keySquareMapper = board;
+    globalState = Object.values(board);
+}
 
-globalState.flat().forEach((square) => {
-  keySquareMapper[square.id] = square;
-});
-initGame(globalState);
+initGame(keySquareMapper);
 GlobalEvents();
 
-export {globalState,keySquareMapper};
+export { globalState, keySquareMapper, setBoard };

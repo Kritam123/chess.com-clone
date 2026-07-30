@@ -1,37 +1,23 @@
-function pawnPromotion(square, onComplete) {
-    const isPromotion =
-        (Number(square.piece.currentPosition[1]) === 8
-            && square.piece.pieceId === "WhitePawn")
-        || (Number(square.piece.currentPosition[1]) === 1
-            && square.piece.pieceId === "BlackPawn");
+function choosePromotion(color) {
+    const dialog = document.getElementById("promotion-dialog");
+    const choices = dialog.querySelectorAll("[data-promotion]");
 
-    if (!isPromotion) {
-        return false;
+    for (const choice of choices) {
+        choice.querySelector("img").src =
+            `/images/pieces/${color}/${choice.dataset.promotion}.png`;
     }
 
-    const color = square.piece.type;
-    const popup = document.querySelector(".fixed");
-    const choices = document.querySelector(`.${color}Pieces`);
-    popup.style.display = "flex";
-    choices.style.display = "flex";
-
-    function selectPromotion(event) {
-        const choice = event.target.closest("li");
-        if (!choice) return;
-
-        square.piece.pieceId = choice.id;
-        square.piece.img = choice.querySelector("img").src;
-        document.getElementById(square.id).querySelector("img").src =
-            square.piece.img;
-
-        choices.style.display = "none";
-        popup.style.display = "none";
-        choices.removeEventListener("click", selectPromotion);
-        onComplete?.();
-    }
-
-    choices.addEventListener("click", selectPromotion);
-    return true;
+    dialog.showModal();
+    return new Promise((resolve) => {
+        function select(event) {
+            const choice = event.target.closest("[data-promotion]");
+            if (!choice) return;
+            dialog.removeEventListener("click", select);
+            dialog.close();
+            resolve(choice.dataset.promotion);
+        }
+        dialog.addEventListener("click", select);
+    });
 }
 
-export { pawnPromotion };
+export { choosePromotion };
